@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stage('NFS Server') {
+        steps {
+            sh 'sudo ansible-playbook -i /var/lib/jenkins/workspace/ansible/hosts /var/lib/jenkins/workspace/ansible/nfs-server.yml -e "host=ip.ip.ip.ip"--private-key id_rsa'
+        }
+    }
+    stages {
+        stage('NFS Client') {
+            steps {
+                sh 'sudo ansible-playbook -i /var/lib/jenkins/workspace/ansible/hosts /var/lib/jenkins/workspace/ansible/nfs-client.yml --private-key id_rsa'
+            }
+        }
+    }
+}
