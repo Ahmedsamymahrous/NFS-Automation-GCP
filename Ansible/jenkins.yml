@@ -8,13 +8,6 @@
       update_cache: yes
 
 
-  - name: Install pip3 
-    yum:
-      name: python3-pip
-      update_cache: yes
-      state: absent
-
-
   - name: Install Ansible 
     yum:
       name: ansible
