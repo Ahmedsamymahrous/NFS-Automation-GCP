@@ -1,0 +1,70 @@
+- hosts: server  
+  remote_user: ahmed  
+  become: yes
+  tasks:
+
+  - name: Update yum
+    yum:
+      update_cache: yes
+
+  - name: Create "/incorta" directory
+    file:
+      path: /incorta
+      state: directory
+      owner: root
+      group: root
+      mode: 0775
+      recurse: yes
+      
+  - name: Create an ext4 filesystem
+    filesystem:
+      fstype: ext4
+      dev: /dev/sdb
+
+  - name: Mount the volume to "/incorta" directory 
+    mount:
+      path: /incorta
+      src: /dev/sdb
+      fstype: ext4
+      state: mounted
+
+  - name: Install NFS 
+    yum:
+      name: nfs-utils
+      state: present
+  
+  - name: Enable NFS service
+    service: 
+      name: nfs-server
+      state: started
+      enabled: true
+
+  - name: Start NFS service
+    service: 
+      name: nfs-server
+      state: started
+      enabled: true
+
+  - name: Export NFS shares
+    copy:
+      dest: /etc/exports
+      content: '/incorta   10.128.0.24(rw,sync,no_subtree_check)'      
+
+  - name: To make the changes effective
+    shell: exportfs -a
+
+
+  - name: Mounting NFS Shares at Boot Time 
+    shell: 
+      cmd: blkid /dev/sdb | sed 's/^[^"]*"\([^"]*\)".*/\1/' > blkid && sed -i 's/^/&UUID=/' blkid && sed -i '$ s@$@  /incorta  ext4  defaults 0 0@' blkid && sudo cat blkid >> /etc/fstab   
+      chdir: /home/ahmed
+
+      
+    ########################################################################
+    #                     Make it perm after reboot                        #
+    ########################################################################
+    # sudo blkid /dev/sdb | sed 's/^[^"]*"\([^"]*\)".*/\1/' > blkid        #
+    # sed -i '$ s@$@  /incorta  ext4  defaults 0 0@' blkid                 #
+    #  sed 's/^/&UUID=/' blkid 
+    # sudo echo blkid >> /etc/fstab                                        #
+    ########################################################################

@@ -1,0 +1,30 @@
+- hosts: client  
+  remote_user: ahmed  
+  become: yes
+  tasks:
+
+  - name: Update yum
+    yum:
+      update_cache: yes
+
+  # - name: Create "/incorta" directory
+  #   file:
+  #     path: /incorta
+  #     state: directory
+  #     mode: 0775
+  #     recurse: yes
+      
+  - name: Install NFS 
+    yum:
+      name: nfs-utils
+      state: present
+
+
+  - name: Mount the disk to the client directory
+    command: mount 10.128.0.25:/incorta /incorta
+      
+
+  - name: Permanently mounted after reboot
+    copy:
+      dest: /etc/fstab
+      content: '10.128.0.25:/incorta  /incorta    nfs          rw            0    0'      

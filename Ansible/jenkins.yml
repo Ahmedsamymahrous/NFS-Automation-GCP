@@ -1,0 +1,69 @@
+- hosts: "{{ host | default('jenkins') }}"
+  remote_user: ahmed  
+  become: yes
+  tasks:
+
+  - name: Update yum
+    yum:
+      update_cache: yes
+
+
+  - name: Install pip3 
+    yum:
+      name: python3-pip
+      update_cache: yes
+      state: absent
+
+
+  - name: Install Ansible 
+    yum:
+      name: ansible
+      state: present
+
+
+  - name: Install OpenJDK 11
+    yum:
+      name: java-11-openjdk
+      state: present
+
+
+  - name: Download jenkins.repo
+    get_url:
+      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo 
+      dest: /etc/yum.repos.d/jenkins.repo
+
+
+  - name: Import Jenkins Key
+    rpm_key:
+      state: present
+      key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+
+  - name: Install Jenkins 
+    yum :
+      name: jenkins
+      update_cache: yes
+      state: present
+
+
+  - name: Ensure Jenkins is running
+    systemd:
+        name: jenkins
+        state: started
+        enabled: true 
+
+
+  - name: Sleep for 60 seconds till Jenkins start, and continue
+    wait_for: timeout=60
+
+
+  - name: Get init password Jenkins
+    shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+    changed_when: false
+    register: result
+    ignore_errors: yes
+
+
+  - name: Print init password Jenkins
+    debug:
+      var: result.stdout
