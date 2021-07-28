@@ -7,12 +7,12 @@
     yum:
       update_cache: yes
 
-  # - name: Create "/incorta" directory
-  #   file:
-  #     path: /incorta
-  #     state: directory
-  #     mode: 0775
-  #     recurse: yes
+  - name: Create "/incorta" directory
+     file:
+       path: /incorta
+       state: directory
+       mode: 0775
+       recurse: yes
       
   - name: Install NFS 
     yum:
